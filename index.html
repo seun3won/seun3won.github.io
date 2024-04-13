@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Button with Drums Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/tone"></script>
+</head>
+<body>
+    <button id="playButton">Play</button>
+    <button id="stopButton">Stop</button>
+    <script>
+        // Create drum sounds using Tone.MembraneSynth
+        const drum = new Tone.MembraneSynth().toDestination();
+        const hat = new Tone.MetalSynth({
+          envelope: {
+              attack: 0.01,
+              decay: 0.1,
+              release: 0.3
+          }
+        }).toDestination();
+        const bass = new Tone.FMSynth({
+          oscillator: {
+              type: 'square' // You can change the oscillator type to achieve different bass tones (sine, square, triangle, etc.)
+          },
+          envelope: {
+              attack: 0.01,
+              decay: 0.1,
+              sustain: 0.5,
+              release: 0.5
+          }
+        }).toDestination();
+        // Create a polyphonic synthesizer for the melody
+        const melody = new Tone.PolySynth({
+          volume: -10, // Adjust the volume as needed (in decibels)
+          oscillator: {
+              type: "square" // Change oscillator type if desired
+          },
+          envelope: {
+              attack: 0.2, // Adjust attack time
+              decay: 0.3, // Adjust decay time
+              sustain: 0.5, // Adjust sustain level
+              release: 1 // Adjust release time
+          }
+        }).toDestination();
+      
+        // Create a boolean variable to track if the sound is playing
+        let isPlaying = false;
+
+        // Function to start the sound
+        async function startSound() {
+            if (!isPlaying) {
+                try {
+                    await Tone.start();
+                    console.log("Tone.js initialized");
+                    Tone.Transport.start();
+                    console.log("Transport started");
+                } catch (error) {
+                    console.error("Failed to initialize Tone.js:", error);
+                }
+                isPlaying = true;
+            }
+        }
+
+        // Function to stop the sound
+        function stopSound() {
+            if (isPlaying) {
+                Tone.Transport.stop();
+                isPlaying = false;
+            }
+        }
+
+        // Add click event listeners to the play and stop buttons
+        const playButton = document.getElementById("playButton");
+        const stopButton = document.getElementById("stopButton");
+        playButton.addEventListener("click", startSound);
+        stopButton.addEventListener("click", stopSound);
+
+        // Trigger sound
+        new Tone.Loop((time) => {
+          drum.triggerAttackRelease("C1", "8n", time);
+          drum.triggerAttackRelease("C1", "8n", time + 0.5);
+          drum.triggerAttackRelease("C2", "8n", time + 0.75);
+          drum.triggerAttackRelease("C1", "8n", time + 1.25);
+          drum.triggerAttackRelease("C2", "8n", time + 1.5);
+        }, 2).start(0);   
+        new Tone.Loop((time) => {
+          hat.triggerAttackRelease("C1", "8n", time + 0.3);
+        }, 2).start(0);   
+        new Tone.Loop((time) => {
+          bass.triggerAttackRelease("C2", "8n", time);
+          bass.triggerAttackRelease("C1", "8n", time + 0.5);
+          bass.triggerAttackRelease("C1", "8n", time + 1);
+          bass.triggerAttackRelease("C2", "8n", time + 1.5);
+        }, 2).start(0);   
+        // Melody loop
+        new Tone.Loop((time) => {
+          melody.triggerAttackRelease(["C4", "E4", "G4"], "4n", time);
+          melody.triggerAttackRelease(["D4", "F4", "A4"], "8n", time + 1);
+          melody.triggerAttackRelease(["G4", "B4", "D4"], "16n", time + 1.5);
+          melody.triggerAttackRelease(["F4", "A4", "C4"], "4n", time + 1.75);
+          melody.triggerAttackRelease(["C4", "E4", "G4"], "8n", time + 2.75);
+          melody.triggerAttackRelease(["D4", "F4", "A4"], "6n", time + 3.25);
+        }, 4).start(0);
+    </script>
+</body>
+</html>
